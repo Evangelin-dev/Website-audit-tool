@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { LoadingSpinner } from '../components/UIComponents';
@@ -7,6 +7,7 @@ import SEOSection from '../components/SEOSection';
 import SecuritySection from '../components/SecuritySection';
 import LinksSection from '../components/LinksSection';
 import ImagesSection from '../components/ImagesSection';
+import UnlockReportModal from '../components/UnlockReportModal';
 import { auditAPI } from '../api/client';
 import { downloadAuditPDF } from '../utils/pdfReport';
 
@@ -276,10 +277,24 @@ export const HomePage = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
+  // Report unlock states
+  const [isReportUnlocked, setIsReportUnlocked] = useState(false);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+
   const handleReset = () => {
     setResult(null);
     setError(null);
     setUrl('');
+    setIsReportUnlocked(false);
+    setShowUnlockModal(false);
+    setUserInfo(null);
+  };
+
+  const handleUnlockReport = (userDetails) => {
+    setUserInfo(userDetails);
+    setIsReportUnlocked(true);
+    setShowUnlockModal(false);
   };
 
   const handleDownloadPDF = () => downloadAuditPDF(result);
@@ -320,6 +335,25 @@ export const HomePage = () => {
     }
   };
 
+  // Ref attached to the first locked section – triggers modal on scroll-into-view
+  const lockedSectionRef = useRef(null);
+  useEffect(() => {
+    if (!result || isReportUnlocked) return;
+    const el = lockedSectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShowUnlockModal(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [result, isReportUnlocked]);
+
   // -- Results view --
   if (result) {
     const respTime       = result.performance?.response_time_ms ?? 0;
@@ -333,6 +367,16 @@ export const HomePage = () => {
     return (
       <div className="min-h-screen bg-gray-900 text-white py-12 px-4">
         <style>{perfCSS}</style>
+
+        {/* Unlock Modal */}
+        <UnlockReportModal
+          isOpen={showUnlockModal}
+          onUnlock={handleUnlockReport}
+          websiteUrl={result?.url}
+          taskId={null}
+          onClose={() => setShowUnlockModal(false)}
+        />
+
         <div className="max-w-6xl mx-auto">
 
           {/* Header */}
@@ -348,27 +392,162 @@ export const HomePage = () => {
             <p className="text-xs text-gray-500 mt-2">
               Analysis completed in {result.analysis_duration_seconds?.toFixed(2)} seconds
             </p>
+            {isReportUnlocked && userInfo && (
+              <div className="mt-4 p-3 bg-green-900 bg-opacity-30 border border-green-700 border-opacity-50 rounded-lg inline-block">
+                <p className="text-green-400 text-sm">
+                  ✅ Report unlocked for <strong>{userInfo.user_name}</strong> · {userInfo.phone_number}
+                </p>
+              </div>
+            )}
           </motion.div>
 
-          {/* Overview */}
+          {/* Overview – always fully visible */}
           <OverviewSection result={result} />
 
-          {/* SEO, Security, Links, Images */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="lg:col-span-2">
-              <SEOSection result={result} />
+          {/* Unlock banner – shown when locked */}
+          {!isReportUnlocked && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{
+                marginTop: '24px',
+                padding: '20px 24px',
+                background: 'linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15))',
+                border: '1px solid rgba(99,102,241,0.4)',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '28px' }}>🔒</span>
+                <div>
+                  <p style={{ fontWeight: 700, fontSize: '15px', color: '#e8ecf4' }}>Full report is locked</p>
+                  <p style={{ fontSize: '12px', color: 'rgba(232,236,244,0.55)', marginTop: '2px' }}>
+                    Enter your name &amp; mobile number to unlock SEO, Security, Links, Images &amp; Performance sections
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowUnlockModal(true)}
+                style={{
+                  padding: '10px 22px',
+                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontWeight: 700,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                🔓 Unlock Full Report
+              </button>
+            </motion.div>
+          )}
+
+          {/* SEO, Security, Links, Images – blurred when locked */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6" style={{ marginTop: '24px' }}>
+
+            {/* SEO – ref here so IntersectionObserver fires when this scrolls into view */}
+            <div ref={lockedSectionRef} className="lg:col-span-2" style={{ position: 'relative' }}>
+              <div style={!isReportUnlocked ? { filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
+                <SEOSection result={result} />
+              </div>
+              {!isReportUnlocked && (
+                <div
+                  onClick={() => setShowUnlockModal(true)}
+                  style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', background: 'rgba(7,9,15,0.45)',
+                    borderRadius: '16px', cursor: 'pointer', zIndex: 10,
+                  }}
+                >
+                  <div style={{ textAlign: 'center', color: '#fff' }}>
+                    <div style={{ fontSize: '32px' }}>🔒</div>
+                    <p style={{ fontWeight: 700, marginTop: '8px', fontSize: '14px' }}>Unlock to view SEO Analysis</p>
+                    <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.55)', marginTop: '4px' }}>Enter your name &amp; mobile number</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <SecuritySection result={result} />
-            <div className="lg:col-span-2">
-              <LinksSection result={result} />
+
+            {/* Security */}
+            <div style={{ position: 'relative' }}>
+              <div style={!isReportUnlocked ? { filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
+                <SecuritySection result={result} />
+              </div>
+              {!isReportUnlocked && (
+                <div
+                  onClick={() => setShowUnlockModal(true)}
+                  style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', background: 'rgba(7,9,15,0.45)',
+                    borderRadius: '16px', cursor: 'pointer', zIndex: 10,
+                  }}
+                >
+                  <div style={{ textAlign: 'center', color: '#fff' }}>
+                    <div style={{ fontSize: '32px' }}>🔒</div>
+                    <p style={{ fontWeight: 700, marginTop: '8px', fontSize: '14px' }}>Unlock to view Security</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <div className="lg:col-span-2">
-              <ImagesSection result={result} />
+
+            {/* Links */}
+            <div className="lg:col-span-2" style={{ position: 'relative' }}>
+              <div style={!isReportUnlocked ? { filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
+                <LinksSection result={result} />
+              </div>
+              {!isReportUnlocked && (
+                <div
+                  onClick={() => setShowUnlockModal(true)}
+                  style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', background: 'rgba(7,9,15,0.45)',
+                    borderRadius: '16px', cursor: 'pointer', zIndex: 10,
+                  }}
+                >
+                  <div style={{ textAlign: 'center', color: '#fff' }}>
+                    <div style={{ fontSize: '32px' }}>🔒</div>
+                    <p style={{ fontWeight: 700, marginTop: '8px', fontSize: '14px' }}>Unlock to view Links Analysis</p>
+                  </div>
+                </div>
+              )}
             </div>
+
+            {/* Images */}
+            <div className="lg:col-span-2" style={{ position: 'relative' }}>
+              <div style={!isReportUnlocked ? { filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
+                <ImagesSection result={result} />
+              </div>
+              {!isReportUnlocked && (
+                <div
+                  onClick={() => setShowUnlockModal(true)}
+                  style={{
+                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                    justifyContent: 'center', background: 'rgba(7,9,15,0.45)',
+                    borderRadius: '16px', cursor: 'pointer', zIndex: 10,
+                  }}
+                >
+                  <div style={{ textAlign: 'center', color: '#fff' }}>
+                    <div style={{ fontSize: '32px' }}>🔒</div>
+                    <p style={{ fontWeight: 700, marginTop: '8px', fontSize: '14px' }}>Unlock to view Images Analysis</p>
+                  </div>
+                </div>
+              )}
+            </div>
+
           </div>
 
-          {/* Performance Details */}
-          <div className="perf-section">
+          {/* Performance Details – blurred when locked */}
+          <div style={{ position: 'relative' }}>
+            <div style={!isReportUnlocked ? { filter: 'blur(5px)', pointerEvents: 'none', userSelect: 'none' } : {}}>
+              <div className="perf-section">
             <div className="perf-header">
               <div className="perf-eyebrow-dot" />
               <span className="perf-eyebrow-label">Performance Details</span>
@@ -446,33 +625,74 @@ export const HomePage = () => {
               </div>
             </div>
           </div>
+            </div>{/* end blur wrapper */}
+            {!isReportUnlocked && (
+              <div
+                onClick={() => setShowUnlockModal(true)}
+                style={{
+                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', background: 'rgba(7,9,15,0.45)',
+                  borderRadius: '16px', cursor: 'pointer', zIndex: 10,
+                }}
+              >
+                <div style={{ textAlign: 'center', color: '#fff' }}>
+                  <div style={{ fontSize: '32px' }}>🔒</div>
+                  <p style={{ fontWeight: 700, marginTop: '8px', fontSize: '14px' }}>Unlock to view Performance Details</p>
+                </div>
+              </div>
+            )}
+          </div>{/* end position:relative wrapper */}
 
           {/* Download button */}
           <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={handleDownloadPDF}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '11px 24px',
-                background: 'var(--emerald)',
-                color: '#07090f',
-                border: 'none',
-                borderRadius: 'var(--r-sm)',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '12px',
-                fontWeight: 800,
-                letterSpacing: '0.05em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,232,150,0.3)'; }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              &#8595; Download Report
-            </button>
+            {isReportUnlocked ? (
+              <button
+                onClick={handleDownloadPDF}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '11px 24px',
+                  background: 'var(--emerald)',
+                  color: '#07090f',
+                  border: 'none',
+                  borderRadius: 'var(--r-sm)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.9'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(0,232,150,0.3)'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+              >
+                &#8595; Download Report
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowUnlockModal(true)}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '11px 24px',
+                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 'var(--r-sm)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                }}
+              >
+                🔒 Unlock Report to Download
+              </button>
+            )}
           </div>
 
         </div>

@@ -28,3 +28,5 @@ __pycache__/
 .env
 .DS_Store
 staticfiles/
+.env
+.env.exapmle

@@ -3,7 +3,8 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 import uuid
-from audit_api.serializers import CreateAuditSerializer
+from audit_api.serializers import CreateAuditSerializer, AuditReporterInfoSerializer
+from audit_api.models import AuditReporterInfo
 from audit_api.auditor import WebsiteAuditor
 
 
@@ -157,3 +158,38 @@ class AuditResultViewSet(viewsets.ViewSet):
         return Response({
             'error': 'Data is returned directly from audit creation'
         }, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AuditReporterInfoViewSet(viewsets.ModelViewSet):
+    """ViewSet for managing audit reporter information."""
+    queryset = AuditReporterInfo.objects.all()
+    serializer_class = AuditReporterInfoSerializer
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        """Save user details for audit report access."""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'])
+    def get_by_task_id(self, request):
+        """Get reporter info by task ID."""
+        task_id = request.query_params.get('task_id')
+        if not task_id:
+            return Response({'error': 'task_id is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            reporter_info = AuditReporterInfo.objects.get(task_id=task_id)
+            serializer = self.get_serializer(reporter_info)
+            return Response(serializer.data)
+        except AuditReporterInfo.DoesNotExist:
+            return Response({'error': 'Reporter info not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=False, methods=['get'])
+    def all_submissions(self, request):
+        """Get all submissions (for portal)."""
+        reporter_infos = AuditReporterInfo.objects.all()
+        serializer = self.get_serializer(reporter_infos, many=True)
+        return Response(serializer.data)

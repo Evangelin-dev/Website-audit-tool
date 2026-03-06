@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import AuditTask, AuditResult, BrokenLink, BrokenImage
+from .models import AuditTask, AuditResult, BrokenLink, BrokenImage, AuditReporterInfo
 
 
 class BrokenLinkSerializer(serializers.ModelSerializer):
@@ -52,3 +52,11 @@ class CreateAuditSerializer(serializers.Serializer):
         if not value.startswith(('http://', 'https://')):
             raise serializers.ValidationError("URL must start with http:// or https://")
         return value
+
+
+class AuditReporterInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AuditReporterInfo
+        fields = ['id', 'task', 'website_url', 'user_name', 'phone_number', 'submission_date', 'updated_at']
+        read_only_fields = ['id', 'submission_date', 'updated_at']
+

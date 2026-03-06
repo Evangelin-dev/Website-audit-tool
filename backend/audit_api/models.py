@@ -99,6 +99,23 @@ class AuditResult(models.Model):
         return f"Result for {self.url}"
 
 
+class AuditReporterInfo(models.Model):
+    """Store user information and audit details for report access."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    task = models.OneToOneField(AuditTask, on_delete=models.CASCADE, related_name='reporter_info', null=True, blank=True)
+    website_url = models.URLField()
+    user_name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=20)
+    submission_date = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-submission_date']
+    
+    def __str__(self):
+        return f"{self.user_name} - {self.website_url}"
+
+
 class BrokenLink(models.Model):
     result = models.ForeignKey(AuditResult, on_delete=models.CASCADE, related_name='broken_links_list')
     url = models.URLField()
