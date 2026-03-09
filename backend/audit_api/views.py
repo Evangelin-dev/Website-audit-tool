@@ -168,7 +168,10 @@ class AuditReporterInfoViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         """Save user details for audit report access."""
-        serializer = self.get_serializer(data=request.data)
+        # Tasks are not persisted to DB (no-database mode), so strip the task
+        # field to avoid a FK lookup failure against a non-existent AuditTask.
+        data = {k: v for k, v in request.data.items() if k != 'task'}
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)

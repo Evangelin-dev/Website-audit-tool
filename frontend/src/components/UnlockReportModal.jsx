@@ -48,7 +48,7 @@ const UnlockReportModal = ({ isOpen, onUnlock, websiteUrl, taskId, onClose }) =>
 
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api/audit'}/reporter-info/`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/audit/reporter-info/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
