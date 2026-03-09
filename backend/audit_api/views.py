@@ -193,6 +193,9 @@ class AuditReporterInfoViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def all_submissions(self, request):
         """Get all submissions (for portal)."""
-        reporter_infos = AuditReporterInfo.objects.all()
-        serializer = self.get_serializer(reporter_infos, many=True)
-        return Response(serializer.data)
+        try:
+            reporter_infos = AuditReporterInfo.objects.all()
+            serializer = self.get_serializer(reporter_infos, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
