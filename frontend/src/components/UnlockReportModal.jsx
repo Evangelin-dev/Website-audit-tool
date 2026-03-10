@@ -363,7 +363,7 @@ const UnlockReportModal = ({ isOpen, onUnlock, websiteUrl, taskId, onClose }) =>
   };
 
   const handleLocalPhoneChange = (e) => {
-    const digits = e.target.value.replace(/[^\d\s\-\(\)]/g, '');
+    const digits = e.target.value.replace(/[^\d\s\-()/]/g, '');
     setLocalPhone(digits);
     setFormData((prev) => ({
       ...prev,
