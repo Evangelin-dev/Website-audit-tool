@@ -259,6 +259,22 @@ const css = `
 
   /* spacer below callout before broken list */
   .img-broken-with-callout { padding-top: 20px; }
+
+  @media (max-width: 768px) {
+    .img-stats {
+      grid-template-columns: 1fr 1fr;
+    }
+    .img-stat:nth-child(2) { border-right: none; }
+    .img-stat:nth-child(1),
+    .img-stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .img-stat { padding: 16px; }
+    .img-alt-callout { flex-direction: column; padding: 14px 16px; }
+    .broken-url { font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    .img-stat-value { font-size: 26px; }
+  }
 `;
 
 const DEMO = {

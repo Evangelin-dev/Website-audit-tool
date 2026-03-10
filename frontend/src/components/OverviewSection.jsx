@@ -136,6 +136,7 @@ const css = `
     position: relative;
     width: 170px;
     height: 170px;
+    flex-shrink: 0;
   }
 
   .ring-outer svg { transform: rotate(-90deg); display: block; }
@@ -424,6 +425,112 @@ const css = `
   .t-indigo .mc-value      { color: var(--indigo); }
   .t-indigo .mc-glow       { background: radial-gradient(circle, var(--indigo-10), transparent 70%); }
   .t-indigo                { --shimmer-color: linear-gradient(90deg, transparent, var(--indigo-20), transparent); }
+
+  /* ── mobile responsive ── */
+  @media (max-width: 900px) {
+    .ov-shell {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    /* On tablet: score panel goes side-by-side (ring left, subs right) */
+    .sp {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      padding: 20px 18px;
+      gap: 16px;
+    }
+
+    .sp-eyebrow { width: 100%; }
+    .sp-divider { display: none; }
+
+    .ring-outer {
+      width: 140px;
+      height: 140px;
+    }
+
+    .grade-area { align-items: flex-start; }
+
+    .subs {
+      flex: 1;
+      min-width: 160px;
+      justify-content: center;
+    }
+
+    .mg {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .sp {
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 16px;
+    }
+
+    .sp-eyebrow { width: auto; align-self: flex-start; }
+    .sp-divider { display: block; }
+    .grade-area { align-items: center; }
+
+    .ring-outer {
+      width: 150px;
+      height: 150px;
+    }
+
+    .ring-num {
+      font-size: 52px;
+      letter-spacing: -2px;
+    }
+
+    .subs { width: 100%; }
+
+    .sub-row {
+      grid-template-columns: 18px 80px 1fr 28px;
+    }
+
+    .mg {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .mc {
+      padding: 16px 14px 14px;
+      gap: 12px;
+    }
+
+    .mc-value {
+      font-size: 30px;
+      letter-spacing: -1px;
+    }
+
+    .mc-title { font-size: 11px; }
+    .mc-unit  { font-size: 9px; }
+    .badge    { font-size: 9px; padding: 3px 8px; }
+  }
+
+  @media (max-width: 400px) {
+    .ring-outer {
+      width: 130px;
+      height: 130px;
+    }
+
+    .ring-num { font-size: 44px; }
+
+    .mg {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+
+    .mc {
+      padding: 12px 10px 10px;
+      gap: 10px;
+    }
+
+    .mc-value { font-size: 24px; }
+    .mc-icon-wrap { width: 28px; height: 28px; font-size: 13px; }
+  }
 `;
 
 // ─── logic ───────────────────────────────────────────────────────────────────
@@ -522,7 +629,7 @@ export const OverviewSection = ({ result = DEMO }) => {
 
             {/* Ring */}
             <div className="ring-outer">
-              <svg width="170" height="170" viewBox="0 0 170 170">
+              <svg width="100%" height="100%" viewBox="0 0 170 170">
                 {/* bg track */}
                 <circle cx="85" cy="85" r={R} fill="none" stroke={grade.track} strokeWidth="10"/>
                 {/* tick marks */}

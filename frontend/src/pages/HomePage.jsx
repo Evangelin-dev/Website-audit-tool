@@ -723,17 +723,17 @@ export const HomePage = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center max-w-2xl w-full"
+          className="text-center max-w-2xl w-full px-2"
         >
           <motion.h1
-            className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
+            className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent"
             animate={{ scale: [1, 1.02, 1] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
             Website Audit Dashboard
           </motion.h1>
 
-          <p className="text-gray-300 text-lg mb-8">
+          <p className="text-gray-300 text-sm sm:text-lg mb-8 px-2">
             Analyze your website in real-time. Get detailed insights on performance, SEO, security, and mobile-friendliness.
           </p>
 

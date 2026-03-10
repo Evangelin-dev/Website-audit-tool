@@ -6,6 +6,7 @@ import uuid
 from audit_api.serializers import CreateAuditSerializer, AuditReporterInfoSerializer
 from audit_api.models import AuditReporterInfo
 from audit_api.auditor import WebsiteAuditor
+from rest_framework.pagination import PageNumberPagination
 
 
 def flatten_audit_result(audit_result: dict) -> dict:
@@ -160,11 +161,18 @@ class AuditResultViewSet(viewsets.ViewSet):
         }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class AuditReporterInfoPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class AuditReporterInfoViewSet(viewsets.ModelViewSet):
     """ViewSet for managing audit reporter information."""
     queryset = AuditReporterInfo.objects.all()
     serializer_class = AuditReporterInfoSerializer
     permission_classes = [AllowAny]
+    pagination_class = AuditReporterInfoPagination
 
     def create(self, request, *args, **kwargs):
         """Save user details for audit report access."""
@@ -192,10 +200,14 @@ class AuditReporterInfoViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def all_submissions(self, request):
-        """Get all submissions (for portal)."""
+        """Get all submissions (for portal) with pagination."""
         try:
-            reporter_infos = AuditReporterInfo.objects.all()
-            serializer = self.get_serializer(reporter_infos, many=True)
+            queryset = AuditReporterInfo.objects.all().order_by('-submission_date')
+            page = self.paginate_queryset(queryset)
+            if page is not None:
+                serializer = self.get_serializer(page, many=True)
+                return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer(queryset, many=True)
             return Response(serializer.data)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

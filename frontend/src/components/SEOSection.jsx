@@ -47,7 +47,6 @@ const css = `
     font-family: 'Inter', sans-serif;
     color: var(--txt);
     -webkit-font-smoothing: antialiased;
-    padding: 32px;
   }
 
   /* ── Section shell ── */
@@ -353,6 +352,29 @@ const css = `
     font-size: 12.5px;
     color: var(--txt-3);
     font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .seo-meta-grid {
+      grid-template-columns: 1fr;
+    }
+    .meta-card:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .seo-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-cell:nth-child(2) { border-right: none; }
+    .stat-cell:nth-child(1),
+    .stat-cell:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .meta-card { padding: 16px; }
+    .stat-cell { padding: 14px 16px; }
+    .meta-text { font-size: 13px; }
+  }
+
+  @media (max-width: 480px) {
+    .seo-stats {
+      grid-template-columns: 1fr 1fr;
+    }
+    .stat-value { font-size: 22px; }
   }
 `;
 
