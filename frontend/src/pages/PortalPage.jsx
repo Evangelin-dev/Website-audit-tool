@@ -1,6 +1,95 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+// Map dial codes (longest first) to flag emoji
+const DIAL_FLAGS = [
+  { dial: '+1242', flag: '🇧🇸' }, { dial: '+1246', flag: '🇧🇧' }, { dial: '+1268', flag: '🇦🇬' },
+  { dial: '+1345', flag: '🇰🇾' }, { dial: '+1441', flag: '🇧🇲' }, { dial: '+1473', flag: '🇬🇩' },
+  { dial: '+1649', flag: '🇹🇨' }, { dial: '+1664', flag: '🇲🇸' }, { dial: '+1670', flag: '🇲🇵' },
+  { dial: '+1671', flag: '🇬🇺' }, { dial: '+1684', flag: '🇦🇸' }, { dial: '+1721', flag: '🇸🇽' },
+  { dial: '+1758', flag: '🇱🇨' }, { dial: '+1767', flag: '🇩🇲' }, { dial: '+1784', flag: '🇻🇨' },
+  { dial: '+1787', flag: '🇵🇷' }, { dial: '+1809', flag: '🇩🇴' }, { dial: '+1849', flag: '🇩🇴' },
+  { dial: '+1868', flag: '🇹🇹' }, { dial: '+1869', flag: '🇰🇳' }, { dial: '+1876', flag: '🇯🇲' },
+  { dial: '+1939', flag: '🇵🇷' },
+  { dial: '+20', flag: '🇪🇬' }, { dial: '+212', flag: '🇲🇦' }, { dial: '+213', flag: '🇩🇿' },
+  { dial: '+216', flag: '🇹🇳' }, { dial: '+218', flag: '🇱🇾' }, { dial: '+220', flag: '🇬🇲' },
+  { dial: '+221', flag: '🇸🇳' }, { dial: '+222', flag: '🇲🇷' }, { dial: '+223', flag: '🇲🇱' },
+  { dial: '+224', flag: '🇬🇳' }, { dial: '+225', flag: '🇨🇮' }, { dial: '+226', flag: '🇧🇫' },
+  { dial: '+227', flag: '🇳🇪' }, { dial: '+228', flag: '🇹🇬' }, { dial: '+229', flag: '🇧🇯' },
+  { dial: '+230', flag: '🇲🇺' }, { dial: '+231', flag: '🇱🇷' }, { dial: '+232', flag: '🇸🇱' },
+  { dial: '+233', flag: '🇬🇭' }, { dial: '+234', flag: '🇳🇬' }, { dial: '+235', flag: '🇹🇩' },
+  { dial: '+236', flag: '🇨🇫' }, { dial: '+237', flag: '🇨🇲' }, { dial: '+238', flag: '🇨🇻' },
+  { dial: '+239', flag: '🇸🇹' }, { dial: '+240', flag: '🇬🇶' }, { dial: '+241', flag: '🇬🇦' },
+  { dial: '+242', flag: '🇨🇬' }, { dial: '+243', flag: '🇨🇩' }, { dial: '+244', flag: '🇦🇴' },
+  { dial: '+245', flag: '🇬🇼' }, { dial: '+246', flag: '🇮🇴' }, { dial: '+247', flag: '🇦🇨' },
+  { dial: '+248', flag: '🇸🇨' }, { dial: '+249', flag: '🇸🇩' }, { dial: '+250', flag: '🇷🇼' },
+  { dial: '+251', flag: '🇪🇹' }, { dial: '+252', flag: '🇸🇴' }, { dial: '+253', flag: '🇩🇯' },
+  { dial: '+254', flag: '🇰🇪' }, { dial: '+255', flag: '🇹🇿' }, { dial: '+256', flag: '🇺🇬' },
+  { dial: '+257', flag: '🇧🇮' }, { dial: '+258', flag: '🇲🇿' }, { dial: '+260', flag: '🇿🇲' },
+  { dial: '+261', flag: '🇲🇬' }, { dial: '+262', flag: '🇷🇪' }, { dial: '+263', flag: '🇿🇼' },
+  { dial: '+264', flag: '🇳🇦' }, { dial: '+265', flag: '🇲🇼' }, { dial: '+266', flag: '🇱🇸' },
+  { dial: '+267', flag: '🇧🇼' }, { dial: '+268', flag: '🇸🇿' }, { dial: '+269', flag: '🇰🇲' },
+  { dial: '+27', flag: '🇿🇦' }, { dial: '+290', flag: '🇸🇭' }, { dial: '+291', flag: '🇪🇷' },
+  { dial: '+297', flag: '🇦🇼' }, { dial: '+298', flag: '🇫🇴' }, { dial: '+299', flag: '🇬🇱' },
+  { dial: '+30', flag: '🇬🇷' }, { dial: '+31', flag: '🇳🇱' }, { dial: '+32', flag: '🇧🇪' },
+  { dial: '+33', flag: '🇫🇷' }, { dial: '+34', flag: '🇪🇸' }, { dial: '+350', flag: '🇬🇮' },
+  { dial: '+351', flag: '🇵🇹' }, { dial: '+352', flag: '🇱🇺' }, { dial: '+353', flag: '🇮🇪' },
+  { dial: '+354', flag: '🇮🇸' }, { dial: '+355', flag: '🇦🇱' }, { dial: '+356', flag: '🇲🇹' },
+  { dial: '+357', flag: '🇨🇾' }, { dial: '+358', flag: '🇫🇮' }, { dial: '+359', flag: '🇧🇬' },
+  { dial: '+36', flag: '🇭🇺' }, { dial: '+370', flag: '🇱🇹' }, { dial: '+371', flag: '🇱🇻' },
+  { dial: '+372', flag: '🇪🇪' }, { dial: '+373', flag: '🇲🇩' }, { dial: '+374', flag: '🇦🇲' },
+  { dial: '+375', flag: '🇧🇾' }, { dial: '+376', flag: '🇦🇩' }, { dial: '+377', flag: '🇲🇨' },
+  { dial: '+378', flag: '🇸🇲' }, { dial: '+380', flag: '🇺🇦' }, { dial: '+381', flag: '🇷🇸' },
+  { dial: '+382', flag: '🇲🇪' }, { dial: '+385', flag: '🇭🇷' }, { dial: '+386', flag: '🇸🇮' },
+  { dial: '+387', flag: '🇧🇦' }, { dial: '+389', flag: '🇲🇰' }, { dial: '+39', flag: '🇮🇹' },
+  { dial: '+40', flag: '🇷🇴' }, { dial: '+41', flag: '🇨🇭' }, { dial: '+420', flag: '🇨🇿' },
+  { dial: '+421', flag: '🇸🇰' }, { dial: '+423', flag: '🇱🇮' }, { dial: '+43', flag: '🇦🇹' },
+  { dial: '+44', flag: '🇬🇧' }, { dial: '+45', flag: '🇩🇰' }, { dial: '+46', flag: '🇸🇪' },
+  { dial: '+47', flag: '🇳🇴' }, { dial: '+48', flag: '🇵🇱' }, { dial: '+49', flag: '🇩🇪' },
+  { dial: '+500', flag: '🇫🇰' }, { dial: '+501', flag: '🇧🇿' }, { dial: '+502', flag: '🇬🇹' },
+  { dial: '+503', flag: '🇸🇻' }, { dial: '+504', flag: '🇭🇳' }, { dial: '+505', flag: '🇳🇮' },
+  { dial: '+506', flag: '🇨🇷' }, { dial: '+507', flag: '🇵🇦' }, { dial: '+508', flag: '🇵🇲' },
+  { dial: '+509', flag: '🇭🇹' }, { dial: '+51', flag: '🇵🇪' }, { dial: '+52', flag: '🇲🇽' },
+  { dial: '+53', flag: '🇨🇺' }, { dial: '+54', flag: '🇦🇷' }, { dial: '+55', flag: '🇧🇷' },
+  { dial: '+56', flag: '🇨🇱' }, { dial: '+57', flag: '🇨🇴' }, { dial: '+58', flag: '🇻🇪' },
+  { dial: '+591', flag: '🇧🇴' }, { dial: '+592', flag: '🇬🇾' }, { dial: '+593', flag: '🇪🇨' },
+  { dial: '+594', flag: '🇬🇫' }, { dial: '+595', flag: '🇵🇾' }, { dial: '+596', flag: '🇲🇶' },
+  { dial: '+597', flag: '🇸🇷' }, { dial: '+598', flag: '🇺🇾' }, { dial: '+599', flag: '🇨🇼' },
+  { dial: '+60', flag: '🇲🇾' }, { dial: '+61', flag: '🇦🇺' }, { dial: '+62', flag: '🇮🇩' },
+  { dial: '+63', flag: '🇵🇭' }, { dial: '+64', flag: '🇳🇿' }, { dial: '+65', flag: '🇸🇬' },
+  { dial: '+66', flag: '🇹🇭' }, { dial: '+670', flag: '🇹🇱' }, { dial: '+672', flag: '🇳🇫' },
+  { dial: '+673', flag: '🇧🇳' }, { dial: '+674', flag: '🇳🇷' }, { dial: '+675', flag: '🇵🇬' },
+  { dial: '+676', flag: '🇹🇴' }, { dial: '+677', flag: '🇸🇧' }, { dial: '+678', flag: '🇻🇺' },
+  { dial: '+679', flag: '🇫🇯' }, { dial: '+680', flag: '🇵🇼' }, { dial: '+681', flag: '🇼🇫' },
+  { dial: '+682', flag: '🇨🇰' }, { dial: '+683', flag: '🇳🇺' }, { dial: '+685', flag: '🇼🇸' },
+  { dial: '+686', flag: '🇰🇮' }, { dial: '+687', flag: '🇳🇨' }, { dial: '+688', flag: '🇹🇻' },
+  { dial: '+689', flag: '🇵🇫' }, { dial: '+690', flag: '🇹🇰' }, { dial: '+691', flag: '🇫🇲' },
+  { dial: '+692', flag: '🇲🇭' }, { dial: '+7', flag: '🇷🇺' }, { dial: '+77', flag: '🇰🇿' },
+  { dial: '+81', flag: '🇯🇵' }, { dial: '+82', flag: '🇰🇷' }, { dial: '+84', flag: '🇻🇳' },
+  { dial: '+850', flag: '🇰🇵' }, { dial: '+852', flag: '🇭🇰' }, { dial: '+853', flag: '🇲🇴' },
+  { dial: '+855', flag: '🇰🇭' }, { dial: '+856', flag: '🇱🇦' }, { dial: '+86', flag: '🇨🇳' },
+  { dial: '+880', flag: '🇧🇩' }, { dial: '+886', flag: '🇹🇼' }, { dial: '+90', flag: '🇹🇷' },
+  { dial: '+91', flag: '🇮🇳' }, { dial: '+92', flag: '🇵🇰' }, { dial: '+93', flag: '🇦🇫' },
+  { dial: '+94', flag: '🇱🇰' }, { dial: '+95', flag: '🇲🇲' }, { dial: '+960', flag: '🇲🇻' },
+  { dial: '+961', flag: '🇱🇧' }, { dial: '+962', flag: '🇯🇴' }, { dial: '+963', flag: '🇸🇾' },
+  { dial: '+964', flag: '🇮🇶' }, { dial: '+965', flag: '🇰🇼' }, { dial: '+966', flag: '🇸🇦' },
+  { dial: '+967', flag: '🇾🇪' }, { dial: '+968', flag: '🇴🇲' }, { dial: '+970', flag: '🇵🇸' },
+  { dial: '+971', flag: '🇦🇪' }, { dial: '+972', flag: '🇮🇱' }, { dial: '+973', flag: '🇧🇭' },
+  { dial: '+974', flag: '🇶🇦' }, { dial: '+975', flag: '🇧🇹' }, { dial: '+976', flag: '🇲🇳' },
+  { dial: '+977', flag: '🇳🇵' }, { dial: '+98', flag: '🇮🇷' }, { dial: '+992', flag: '🇹🇯' },
+  { dial: '+993', flag: '🇹🇲' }, { dial: '+994', flag: '🇦🇿' }, { dial: '+995', flag: '🇬🇪' },
+  { dial: '+996', flag: '🇰🇬' }, { dial: '+998', flag: '🇺🇿' },
+  { dial: '+1', flag: '🇺🇸' },
+];
+
+// Match longest dial code first
+const getFlagFromPhone = (phone) => {
+  if (!phone || !phone.startsWith('+')) return '';
+  const sorted = [...DIAL_FLAGS].sort((a, b) => b.dial.length - a.dial.length);
+  const match = sorted.find((d) => phone.startsWith(d.dial));
+  return match ? match.flag : '';
+};
+
 const PortalPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -198,7 +287,16 @@ const PortalPage = () => {
                   >
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-white font-medium truncate">{submission.user_name}</td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-300 hidden md:table-cell truncate">{submission.email || '—'}</td>
-                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-300 truncate">{submission.phone_number}</td>
+                    <td className="px-3 sm:px-6 py-3 sm:py-4 text-gray-300 truncate">
+                      <span className="inline-flex items-center gap-1.5">
+                        {getFlagFromPhone(submission.phone_number) && (
+                          <span className="text-base leading-none" title={submission.phone_number}>
+                            {getFlagFromPhone(submission.phone_number)}
+                          </span>
+                        )}
+                        <span>{submission.phone_number}</span>
+                      </span>
+                    </td>
                     <td className="px-3 sm:px-6 py-3 sm:py-4 text-blue-400 break-all hidden lg:table-cell">
                       <a
                         href={submission.website_url}
