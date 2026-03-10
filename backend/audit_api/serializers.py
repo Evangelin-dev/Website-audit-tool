@@ -57,6 +57,6 @@ class CreateAuditSerializer(serializers.Serializer):
 class AuditReporterInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuditReporterInfo
-        fields = ['id', 'task', 'website_url', 'user_name', 'phone_number', 'submission_date', 'updated_at']
+        fields = ['id', 'task', 'website_url', 'user_name', 'email', 'phone_number', 'submission_date', 'updated_at']
         read_only_fields = ['id', 'submission_date', 'updated_at']
 

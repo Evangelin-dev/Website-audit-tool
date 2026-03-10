@@ -318,6 +318,31 @@ const css = `
     border-radius: 99px;
     font-weight: 500;
   }
+
+  @media (max-width: 768px) {
+    .sec-top {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .sec-stat:nth-child(2) { border-right: none; }
+    .sec-stat:nth-child(1),
+    .sec-stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .headers-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .sec-stat { padding: 16px; }
+    .sec-headers-wrap { padding: 16px; }
+  }
+
+  @media (max-width: 480px) {
+    .sec-top {
+      grid-template-columns: 1fr 1fr;
+    }
+    .headers-grid {
+      grid-template-columns: 1fr;
+    }
+    .sec-stat-value { font-size: 26px; }
+    .header-name { font-size: 10px; }
+  }
 `;
 
 // ─── helpers ─────────────────────────────────────────────────────────────────

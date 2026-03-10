@@ -282,6 +282,25 @@ const css = `
   }
 
   .empty-text { font-size: 13px; color: var(--txt-3); text-align: center; line-height: 1.6; }
+
+  @media (max-width: 768px) {
+    .lnk-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .lnk-stat:nth-child(2) { border-right: none; }
+    .lnk-stat:nth-child(1),
+    .lnk-stat:nth-child(2) { border-bottom: 1px solid var(--border); }
+    .lnk-stat { padding: 16px; }
+    .broken-url { font-size: 11px; }
+  }
+
+  @media (max-width: 480px) {
+    .lnk-stats {
+      grid-template-columns: 1fr 1fr;
+    }
+    .lnk-stat-value { font-size: 26px; }
+    .dist-header { flex-direction: column; gap: 8px; }
+  }
 `;
 
 const DEMO = {

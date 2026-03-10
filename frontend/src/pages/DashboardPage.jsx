@@ -111,7 +111,7 @@ export const DashboardPage = () => {
   const getBlurStyle = () => isReportUnlocked ? {} : { filter: 'blur(8px)', pointerEvents: 'none', opacity: 0.6 };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-12 px-4">
+    <div className="min-h-screen bg-gray-900 text-white py-8 sm:py-12 px-3 sm:px-4">
       {/* Unlock Modal */}
       <UnlockReportModal
         isOpen={showUnlockModal && !isReportUnlocked}
@@ -134,8 +134,8 @@ export const DashboardPage = () => {
           >
             ← New Audit
           </a>
-          <h1 className="text-4xl font-bold mb-2">Website Audit Report</h1>
-          <p className="text-gray-400">{result.url}</p>
+          <h1 className="text-2xl sm:text-4xl font-bold mb-2">Website Audit Report</h1>
+          <p className="text-gray-400 text-sm sm:text-base break-all">{result.url}</p>
           <p className="text-xs text-gray-500 mt-2">
             Analysis completed in {result.analysis_duration_seconds?.toFixed(2)} seconds
           </p>
@@ -151,7 +151,7 @@ export const DashboardPage = () => {
         </motion.div>
 
         {/* ── All sections in one flex column with consistent 32px gap ── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
 
           {/* Overview - Always visible */}
           <OverviewSection result={result} />
@@ -179,22 +179,22 @@ export const DashboardPage = () => {
           {/* Performance Details - Blurred if locked */}
           <div style={getBlurStyle()}>
             <SectionCard title="⚡ Performance Details">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gray-700 rounded-lg p-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-gray-700 rounded-lg p-3 sm:p-4">
                   <p className="text-xs text-gray-400 mb-1">Response Time</p>
-                  <p className="text-xl font-bold text-white">{result.response_time_ms}ms</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{result.response_time_ms}ms</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="bg-gray-700 rounded-lg p-3 sm:p-4">
                   <p className="text-xs text-gray-400 mb-1">Page Size</p>
-                  <p className="text-xl font-bold text-white">{result.page_size_mb?.toFixed(2)}MB</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{result.page_size_mb?.toFixed(2)}MB</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="bg-gray-700 rounded-lg p-3 sm:p-4">
                   <p className="text-xs text-gray-400 mb-1">Total Requests</p>
-                  <p className="text-xl font-bold text-white">{result.total_requests}</p>
+                  <p className="text-lg sm:text-xl font-bold text-white">{result.total_requests}</p>
                 </div>
-                <div className="bg-gray-700 rounded-lg p-4">
+                <div className="bg-gray-700 rounded-lg p-3 sm:p-4">
                   <p className="text-xs text-gray-400 mb-1">Mobile Friendly</p>
-                  <p className={`text-xl font-bold ${result.is_mobile_friendly ? 'text-green-400' : 'text-red-400'}`}>
+                  <p className={`text-lg sm:text-xl font-bold ${result.is_mobile_friendly ? 'text-green-400' : 'text-red-400'}`}>
                     {result.is_mobile_friendly ? '✅' : '❌'}
                   </p>
                 </div>
@@ -203,22 +203,22 @@ export const DashboardPage = () => {
               {/* Request Breakdown */}
               <div className="mt-6 pt-6 border-t border-gray-600">
                 <p className="text-xs text-gray-400 mb-4 uppercase tracking-wide">Request Breakdown</p>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-orange-900 bg-opacity-30 rounded-lg p-4 border border-orange-700 border-opacity-30">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-orange-900 bg-opacity-30 rounded-lg p-3 sm:p-4 border border-orange-700 border-opacity-30">
                     <p className="text-xs text-orange-400 mb-2">📜 Scripts</p>
-                    <p className="text-2xl font-bold text-orange-300">{result.script_requests || 0}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-orange-300">{result.script_requests || 0}</p>
                   </div>
-                  <div className="bg-blue-900 bg-opacity-30 rounded-lg p-4 border border-blue-700 border-opacity-30">
+                  <div className="bg-blue-900 bg-opacity-30 rounded-lg p-3 sm:p-4 border border-blue-700 border-opacity-30">
                     <p className="text-xs text-blue-400 mb-2">🎨 Stylesheets</p>
-                    <p className="text-2xl font-bold text-blue-300">{result.stylesheet_requests || 0}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-blue-300">{result.stylesheet_requests || 0}</p>
                   </div>
-                  <div className="bg-emerald-900 bg-opacity-30 rounded-lg p-4 border border-emerald-700 border-opacity-30">
+                  <div className="bg-emerald-900 bg-opacity-30 rounded-lg p-3 sm:p-4 border border-emerald-700 border-opacity-30">
                     <p className="text-xs text-emerald-400 mb-2">🖼️ Images</p>
-                    <p className="text-2xl font-bold text-emerald-300">{result.image_requests || 0}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-emerald-300">{result.image_requests || 0}</p>
                   </div>
-                  <div className="bg-purple-900 bg-opacity-30 rounded-lg p-4 border border-purple-700 border-opacity-30">
+                  <div className="bg-purple-900 bg-opacity-30 rounded-lg p-3 sm:p-4 border border-purple-700 border-opacity-30">
                     <p className="text-xs text-purple-400 mb-2">📱 Iframes</p>
-                    <p className="text-2xl font-bold text-purple-300">{result.iframe_requests || 0}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-purple-300">{result.iframe_requests || 0}</p>
                   </div>
                 </div>
               </div>
@@ -228,23 +228,23 @@ export const DashboardPage = () => {
         </div>
 
         {/* Export PDF Button */}
-        <div className="mt-12 text-center">
+        <div className="mt-8 sm:mt-12 text-center">
           {!isReportUnlocked ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <button
                 onClick={() => setShowUnlockModal(true)}
-                className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition transform hover:scale-105"
+                className="px-6 sm:px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition transform hover:scale-105 text-sm sm:text-base"
               >
                 🔓 Unlock Report to Download
               </button>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-xs sm:text-sm">
                 Please fill in your details to unlock the full report and download it as PDF
               </p>
             </div>
           ) : (
             <button
               onClick={handleDownloadPDF}
-              className="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition transform hover:scale-105"
+              className="px-6 sm:px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition transform hover:scale-105 text-sm sm:text-base"
             >
               📥 Download Report (PDF)
             </button>

@@ -105,6 +105,7 @@ class AuditReporterInfo(models.Model):
     task = models.OneToOneField(AuditTask, on_delete=models.CASCADE, related_name='reporter_info', null=True, blank=True)
     website_url = models.URLField()
     user_name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=254, blank=True, null=True)
     phone_number = models.CharField(max_length=20)
     submission_date = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
