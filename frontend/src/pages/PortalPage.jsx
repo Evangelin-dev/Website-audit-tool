@@ -17,7 +17,7 @@ const PortalPage = () => {
   const fetchSubmissions = async (page = 1) => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/api/audit/reporter-info/all_submissions/?page=${page}&page_size=${pageSize}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000'}/reporter-info/all_submissions/?page=${page}&page_size=${pageSize}`);
       if (response.ok) {
         const data = await response.json();
         setSubmissions(data.results || []);
