@@ -5,14 +5,14 @@ const PortalPage = () => {
   const [submissions, setSubmissions] = useState([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchSubmissions(currentPage);
-  }, [currentPage]);
+  }, [currentPage, pageSize]);
 
   const fetchSubmissions = async (page = 1) => {
     try {
